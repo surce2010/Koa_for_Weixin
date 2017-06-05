@@ -5,7 +5,7 @@ var util = require('./util');
 var autoReply = require('./autoReply');
 
 module.exports = function(opts) {
-	// var wechat = new Wechat(opts);
+	var wechat = new Wechat(opts);
 	// console.log(wechat);
 	return function *(next) {
 		var token = opts.token;
@@ -33,7 +33,11 @@ module.exports = function(opts) {
 			});
 
 			var message = (yield util.parseXMLAsync(data)).xml;
-			autoReply.bind(this, message)();
+			var xml = yield autoReply(message, wechat);
+			
+			this.status = 200;
+			this.type = 'application/xml';
+			this.body = xml;
 		}
 	};
 };

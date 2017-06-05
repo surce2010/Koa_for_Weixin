@@ -1,64 +1,55 @@
 var createXML= require('./createXML');
 
-function autoReply(message) {
-	this.status = 200;
-	this.type = 'application/xml';
-
+function autoReply(message, wechat) {
 	if (message.MsgType === 'event') {
 		if (message.Event === 'subscribe') {
 			if (message.EventKey) {
 				console.log('扫码进入');
 			}
 			var now = new Date().getTime();
-			this.body = createXML({
+			return Promise.resolve(createXML({
 				ToUserName: message.FromUserName,
 				FromUserName: message.ToUserName,
 				MsgType: 'text',
 				Content: 'Hello!!'
-			});
-			return;
+			}));
 		}else if (message.Event === 'unsubscribe') {
 			console.log('取关');
 		}else if (message.Event === 'LOCATION') {
-			this.body = createXML({
+			return Promise.resolve(createXML({
 				ToUserName: message.FromUserName,
 				FromUserName: message.ToUserName,
 				MsgType: 'text',
 				Content: `位置：${message.Latitude},${message.Longitude},${message.Precision}`
-			});
-			return;
+			}));
 		}else if (message.Event === 'CLICK') {
-			this.body = createXML({
+			return Promise.resolve(createXML({
 				ToUserName: message.FromUserName,
 				FromUserName: message.ToUserName,
 				MsgType: 'text',
 				Content: `点击事件`
-			});
-			return;
+			}));
 		}else if (message.Event === 'SCAN') {
-			this.body = createXML({
+			return Promise.resolve(createXML({
 				ToUserName: message.FromUserName,
 				FromUserName: message.ToUserName,
 				MsgType: 'text',
 				Content: `关注后扫码`
-			});
-			return;
+			}));
 		}else if (message.Event === 'VIEW') {
 			console.log(`点击链接：${message.EventKey}`);
-			return;
 		}
 	}else if (message.MsgType === 'text') {
 		var content = message.Content;
 		if (content === '1') {
-			this.body = createXML({
+			return Promise.resolve(createXML({
 				ToUserName: message.FromUserName,
 				FromUserName: message.ToUserName,
 				MsgType: 'text',
 				Content: `ahahahahhah`
-			});
-			return;
+			}));
 		}else if (content === '2') {
-			this.body = createXML({
+			return Promise.resolve(createXML({
 				ToUserName: message.FromUserName,
 				FromUserName: message.ToUserName,
 				MsgType: 'news',
@@ -76,16 +67,27 @@ function autoReply(message) {
 						Url: 'http://www.baidu.com'
 					}
 				]
+			}));
+		}else if (content === '5') {
+			return new Promise(function(resolve, reject) {
+				wechat.uploadMaterial('image', __dirname + '/2.png')
+				.then(function(data) {
+					var xml = createXML({
+						ToUserName: message.FromUserName,
+						FromUserName: message.ToUserName,
+						MsgType: 'image',
+						MediaId: data.media_id
+					});
+					resolve(xml);
+				});
 			});
-			return;
 		}else {
-			this.body = createXML({
+			return Promise.resolve(createXML({
 				ToUserName: message.FromUserName,
 				FromUserName: message.ToUserName,
 				MsgType: 'text',
 				Content: `( ⊙ o ⊙ )啊？`
-			});
-			return;
+			}));
 		}
 	}
 }
