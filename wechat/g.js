@@ -34,7 +34,7 @@ module.exports = function(opts) {
 
 			var message = (yield util.parseXMLAsync(data)).xml;
 			var xml = yield autoReply(message, wechat);
-			
+
 			this.status = 200;
 			this.type = 'application/xml';
 			this.body = xml;

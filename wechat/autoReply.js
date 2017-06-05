@@ -81,7 +81,85 @@ function autoReply(message, wechat) {
 					resolve(xml);
 				});
 			});
-		}else {
+		}else if (content === '6') {
+			return new Promise(function(resolve, reject) {
+				wechat.uploadMaterial('image', __dirname + '/2.png', { type: 'image' })
+				.then(function(data) {
+					var xml = createXML({
+						ToUserName: message.FromUserName,
+						FromUserName: message.ToUserName,
+						MsgType: 'image',
+						MediaId: data.media_id
+					});
+					resolve(xml);
+				});
+			});	
+		}else if (content === '7') {
+			return new Promise(function(resolve, reject) {
+				wechat.uploadMaterial('video', __dirname + '/3.mp4', { type: 'video', description: '{ "title": "ABC", "introduction": "QWERT"}'})
+				.then(function(data) {
+					var xml = createXML({
+						ToUserName: message.FromUserName,
+						FromUserName: message.ToUserName,
+						MsgType: 'video',
+						MediaId: data.media_id,
+						Title: '单据金额',
+						Description: '永久素材-视频'
+					});
+					resolve(xml);
+				});
+			});
+		}else if (content === '8') {
+			// 未测！！
+			return new Promise(function(resolve, reject) {
+				wechat.uploadMaterial('image', __dirname + '/2.png', {})
+				.then(function(data) {
+					var articles = {
+						"articles" : [{
+							"title": "上传图文素材标题",
+							"thumb_media_id": data.media_id,
+							"author": "zhangcui",
+							"digest": "图文消息的摘要，仅有单图文消息才有摘要，多图文此处为空",
+							"show_cover_pic": 1,
+							"content": "图文消息的具体内容，支持HTML标签，必须少于2万字符，小于1M，且此处会去除JS,涉及图片url必须来源上传图文消息内的图片获取URL接口获取。外部图片url将被过滤。",
+							"content_source_url": "https://www.baidu.com"
+						}]
+					};
+
+					wechat.uploadMaterial('news', articles, {})
+					.then(function(data) {
+						console.log('upload news', data);
+					})
+				});
+			});
+		}else if (content === '9') {
+			return new Promise(function(resolve, reject) {
+				wechat.countMaterial()
+				.then(function(data) {
+					var xml = createXML({
+						ToUserName: message.FromUserName,
+						FromUserName: message.ToUserName,
+						MsgType: 'text',
+						Content: JSON.stringify(data)
+					});
+					resolve(xml);
+				})
+			});	
+		}else if (content === '10') {
+			return new Promise(function(resolve, reject) {
+				wechat.batchMaterial({type: 'news', count: 20})
+				.then(function(data) {
+					var xml = createXML({
+						ToUserName: message.FromUserName,
+						FromUserName: message.ToUserName,
+						MsgType: 'text',
+						Content: JSON.stringify(data)
+					});
+					resolve(xml);
+				})
+			});	
+		}
+		else {
 			return Promise.resolve(createXML({
 				ToUserName: message.FromUserName,
 				FromUserName: message.ToUserName,
