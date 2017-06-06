@@ -110,7 +110,6 @@ function autoReply(message, wechat) {
 				});
 			});
 		}else if (content === '8') {
-			// 未测！！
 			return new Promise(function(resolve, reject) {
 				wechat.uploadMaterial('image', __dirname + '/2.png', {})
 				.then(function(data) {
@@ -128,8 +127,27 @@ function autoReply(message, wechat) {
 
 					wechat.uploadMaterial('news', articles, {})
 					.then(function(data) {
-						console.log('upload news', data);
-					})
+						console.log('start fetch');
+						wechat.fetchMaterial(data.media_id, 'news', {})
+						.then(function(data) {
+							var articles = [];
+							for (var i = 0; i < data.news_item.length; i++) {
+								var item = {};
+								item.Title = data.news_item[i].title;
+								item.Description = data.news_item[i].digest;
+								item.PicUrl = data.news_item[i].thumb_url;
+								item.Url = data.news_item[i].url;
+								articles.push(item);
+							}
+							var xml = createXML({
+								ToUserName: message.FromUserName,
+								FromUserName: message.ToUserName,
+								MsgType: 'news',
+								Articles: articles
+							});
+							resolve(xml);
+						});
+					});
 				});
 			});
 		}else if (content === '9') {
@@ -143,7 +161,7 @@ function autoReply(message, wechat) {
 						Content: JSON.stringify(data)
 					});
 					resolve(xml);
-				})
+				});
 			});	
 		}else if (content === '10') {
 			return new Promise(function(resolve, reject) {
@@ -156,8 +174,76 @@ function autoReply(message, wechat) {
 						Content: JSON.stringify(data)
 					});
 					resolve(xml);
-				})
+				});
 			});	
+		}else if (content === '11') {
+			return new Promise(function(resolve, reject) {
+				var name = new Date().getTime() + 'zc';
+				wechat.createTag(name)
+				.then(function(data) {
+					var xml = createXML({
+						ToUserName: message.FromUserName,
+						FromUserName: message.ToUserName,
+						MsgType: 'text',
+						Content: JSON.stringify(data)
+					});
+					resolve(xml);
+				});
+			});
+		}else if (content === '12') {
+			return new Promise(function(resolve, reject) {
+				wechat.getTag()
+				.then(function(data) {
+					var xml = createXML({
+						ToUserName: message.FromUserName,
+						FromUserName: message.ToUserName,
+						MsgType: 'text',
+						Content: JSON.stringify(data)
+					});
+					resolve(xml);
+				});
+			});
+		}else if (content === '13') {
+			return new Promise(function(resolve, reject) {
+				var openIds = [{
+					"openid": message.FromUserName,
+					"lang": 'en'
+				}];
+				wechat.fetchUsers(openIds)
+				.then(function(data) {
+					resolve("");
+				});
+			});
+		}else if (content === '14') {
+			return new Promise(function(resolve, reject) {
+				wechat.remarkUser(message.FromUserName, 'zhangcuicuicuicui')
+				.then(function(data) {
+					if (data.errcode === 0) {
+						var xml = createXML({
+							ToUserName: message.FromUserName,
+							FromUserName: message.ToUserName,
+							MsgType: 'text',
+							Content: 'remark success'
+						});
+						resolve(xml);
+					}else {
+						resolve('');
+					}
+				});
+			});
+		}else if (content === '15') {
+			return new Promise(function(resolve, reject) {
+				wechat.listUsers()
+				.then(function(data) {
+					var xml = createXML({
+						ToUserName: message.FromUserName,
+						FromUserName: message.ToUserName,
+						MsgType: 'text',
+						Content: JSON.stringify(data)
+					});
+					resolve(xml);
+				})
+			})
 		}
 		else {
 			return Promise.resolve(createXML({
