@@ -22,14 +22,28 @@ var api = {
 	tags: {
 		create: prefix + '/tags/create',
 		get: prefix + '/tags/get',
-		update: prefix + '/tags/update',
-		del: prefix + '/tags/delete',
+		update: prefix + '/tags/update',//
+		del: prefix + '/tags/delete',//
+		getusersfromtag: prefix + '/user/tag/get',
+		batchtag: prefix + '/tags/members/batchtagging'
 	},
 	user: {
 		remark: prefix + '/user/info/updateremark',
 		fetch: prefix + '/user/info',
 		batch: prefix + '/user/info/batchget',
 		list: prefix + '/user/get'
+	},
+	mass: {
+		send: prefix + '/message/mass/send'
+	},
+	menu: {
+		create: prefix + '/menu/create',
+		get: prefix + '/menu/get',
+		del: prefix + '/menu/delete'
+	},
+	qrcode: {
+		create: prefix + '/qrcode/create',
+		get: 'https://mp.weixin.qq.com/cgi-bin/showqrcode'
 	}
 };
 
@@ -389,6 +403,70 @@ Wechat.prototype.getTag = function() {
 	});
 };
 
+Wechat.prototype.getUsersFromTag = function(tagId, next_openid) {
+	var that = this;
+
+	return new Promise(function(resolve, reject) {
+		that
+			.fetchAccessToken()
+			.then(function(data) {
+				var url = api.tags.getusersfromtag + `?access_token=${data.access_token}`;
+
+				var form = {
+					"tagid": tagId
+				}
+				if (next_openid) {
+					form.next_openid = next_openid;
+				}
+
+				request({method: 'POST', url: url, body: form, json: true}).then(function(response) {
+					console.log('get users from tag successs', response);
+					var _data = response;
+					
+					if (_data) {
+						resolve(_data);
+					}else {
+						throw new Error('Get Users From Tag failed');
+					}
+				});
+			})
+			.catch(function(err) {
+				reject(err);
+			});
+	});
+};
+
+Wechat.prototype.batchTagging = function(openid_list, tagid) {
+	var that = this;
+
+	return new Promise(function(resolve, reject) {
+		that
+			.fetchAccessToken()
+			.then(function(data) {
+				var url = api.tags.batchtag + `?access_token=${data.access_token}`;
+
+				var form = {
+					"tagid": tagid,
+					"openid_list": openid_list
+				}
+
+				request({method: 'POST', url: url, body: form, json: true}).then(function(response) {
+					console.log('BatchTagging successs', response);
+					var _data = response;
+					
+					if (_data) {
+						resolve(_data);
+					}else {
+						throw new Error('BatchTagging failed');
+					}
+				});
+			})
+			.catch(function(err) {
+				reject(err);
+			});
+	});
+};
+
 Wechat.prototype.remarkUser = function(openId, remark) {
 	var that = this;
 
@@ -489,5 +567,154 @@ Wechat.prototype.listUsers = function(openId) {
 			});
 	});
 };
+
+Wechat.prototype.sendByIds = function(obj) {
+	var that = this;
+
+	return new Promise(function(resolve, reject) {
+		that
+			.fetchAccessToken()
+			.then(function(data) {
+				var url = api.mass.send + `?access_token=${data.access_token}`;
+				// var form = {
+				// 	"filter": {
+				// 		"is_to_all": true
+				// 	},
+				// 	"mpnews": mpnews,
+				// 	"msgtype": msgtype,
+				// 	"send_ignore_reprint": 0
+				// }
+
+				// if (tag_id) {
+				// 	form.filter = {
+				// 		"is_to_all": false,
+				// 		"tag_id": tag_id
+				// 	}
+				// }
+
+				request({method: 'POST', url: url, body: obj, json: true}).then(function(response) {
+					console.log('mass send msg successs', response);
+					var _data = response;
+					
+					if (_data) {
+						resolve(_data);
+					}else {
+						throw new Error('Mass Send Msg failed');
+					}
+				});
+			})
+			.catch(function(err) {
+				reject(err);
+			});
+	});
+};
+
+Wechat.prototype.createMenu = function(menu) {
+	var that = this;
+
+	return new Promise(function(resolve, reject) {
+		that
+			.fetchAccessToken()
+			.then(function(data) {
+				var url = api.menu.create + `?access_token=${data.access_token}`;
+
+				request({method: 'POST', url: url, body: menu, json: true}).then(function(response) {
+					console.log('create menu successs', response);
+					var _data = response;
+					
+					if (_data) {
+						resolve(_data);
+					}else {
+						throw new Error('Create Menu failed');
+					}
+				});
+			})
+			.catch(function(err) {
+				reject(err);
+			});
+	});
+};
+
+Wechat.prototype.getMenu = function() {
+	var that = this;
+
+	return new Promise(function(resolve, reject) {
+		that
+			.fetchAccessToken()
+			.then(function(data) {
+				var url = api.menu.get + `?access_token=${data.access_token}`;
+
+				request({url: url, json: true}).then(function(response) {
+					console.log('get menu successs', response);
+					var _data = response;
+					
+					if (_data) {
+						resolve(_data);
+					}else {
+						throw new Error('Get Menu failed');
+					}
+				});
+			})
+			.catch(function(err) {
+				reject(err);
+			});
+	});
+};
+
+Wechat.prototype.deleteMenu = function() {
+	var that = this;
+
+	return new Promise(function(resolve, reject) {
+		that
+			.fetchAccessToken()
+			.then(function(data) {
+				var url = api.menu.del + `?access_token=${data.access_token}`;
+
+				request({url: url, json: true}).then(function(response) {
+					console.log('delete menu successs', response);
+					var _data = response;
+					
+					if (_data) {
+						resolve(_data);
+					}else {
+						throw new Error('Delete Menu failed');
+					}
+				});
+			})
+			.catch(function(err) {
+				reject(err);
+			});
+	});
+};
+
+Wechat.prototype.createQrcode = function(qrcode) {
+	var that = this;
+
+	return new Promise(function(resolve, reject) {
+		that
+			.fetchAccessToken()
+			.then(function(data) {
+				var url = api.qrcode.create + `?access_token=${data.access_token}`;
+
+				request({method: 'POST', url: url, body: qrcode, json: true}).then(function(response) {
+					console.log('create qrcode ticket successs', response);
+					var _data = response;
+					
+					if (_data) {
+						resolve(_data);
+					}else {
+						throw new Error('Create Qrcode Ticket failed');
+					}
+				});
+			})
+			.catch(function(err) {
+				reject(err);
+			});
+	});
+};
+
+Wechat.prototype.getQrcode = function(ticket) {
+	return Promise.resolve(`${api.qrcode.get}?ticket=${encodeURI(ticket.ticket)}`);
+} 
 
 module.exports = Wechat;

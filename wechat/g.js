@@ -32,8 +32,10 @@ module.exports = function(opts) {
 				encoding: this.charset
 			});
 
-			var message = (yield util.parseXMLAsync(data)).xml;
-			var xml = yield autoReply(message, wechat);
+			var message = yield util.parseXMLAsync(data);
+			var xml = yield autoReply(message.xml, wechat);
+			console.log(message);
+			// console.log(xml);
 
 			this.status = 200;
 			this.type = 'application/xml';
