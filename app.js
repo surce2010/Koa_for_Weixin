@@ -1,5 +1,6 @@
 var Koa = require('koa');
 var path = require('path');
+var views = require('koa-views');
 var wechat = require('./wechat/g');
 var util =require('./libs/util');
 var wechat_file = path.join(__dirname, './config/wechat.txt');
@@ -20,6 +21,19 @@ var config = {
 
 var app = new Koa();
 
+// app.use(views(__dirname + '/views', {
+// 	extension: 'jade'
+// }));
+
+
+app.use(function *(next) {
+	if (this.url.indexOf('/movie') > -1) {
+		// this.body = '<h1>HI Hello</h1>';
+		this.render('./views/test.jade');
+		return next;
+	}
+	yield next;
+});
 app.use(wechat(config.wechat));
 
 app.listen(80);
